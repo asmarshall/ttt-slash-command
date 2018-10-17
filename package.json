@@ -1,0 +1,29 @@
+{
+  "name": "ttt-slash-command",
+  "version": "1.0.0",
+  "description": "A slash command game of Tic Tac Toe for Slack.",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/asmarshall/ttt-slash-command.git"
+  },
+  "author": "Angela Marshall",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/asmarshall/ttt-slash-command/issues"
+  },
+  "homepage": "https://github.com/asmarshall/ttt-slash-command#readme",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "ejs": "^2.6.1",
+    "express": "^4.16.4",
+    "knex": "^0.15.2",
+    "locus": "^2.0.1",
+    "method-override": "^3.0.0",
+    "morgan": "^1.9.1",
+    "pg": "^7.5.0"
+  }
+}
