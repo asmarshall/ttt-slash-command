@@ -4,7 +4,8 @@
   "description": "A slash command game of Tic Tac Toe for Slack.",
   "main": "index.js",
   "scripts": {
-    "test": "npm test"
+    "test": "npm test",
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
