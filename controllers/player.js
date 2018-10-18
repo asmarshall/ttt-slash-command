@@ -36,6 +36,13 @@ const playTurn = (req, res, number) => {
     board = JSON.parse(currentGame.board);
     nextPlayerUp = findNextPlayer(board, currentGame.owner_mark_0, currentGame.owner_mark_x);
 
+    // verify if the user who made the play is supposed to be next
+    if (req.body.user_id !== nextPlayerUp) {
+      res.send("Hew now, it's <@" + nextPlayerUp + ">'s turn!");
+      return;
+    }
+
+    // assign the markings: the challenger is X and other player is O
     if (req.body.user_id === currentGame.owner_mark_0) {
       currentPlayer = currentGame.owner_mark_0;
       marking = 'O';
@@ -46,34 +53,55 @@ const playTurn = (req, res, number) => {
 
     board[number] = marking; // mark the board
 
+    // check if this move is a winning play
     if (Board.checkWin(marking, board)) {
-      let winningMessage = currentGame.notes || 'We have a winner!! Congrats <@' + currentPlayer + '>! \n' + Board.printBoard(board);
-      let note = "<@" + currentPlayer + "won the game! \n" + Board.printBoard(board);
+      let winningMessage = {
+        "response_type": "in_channel",
+        "text": "We have a winner!! Congrats <@" + currentPlayer + ">!",
+        "attachments": [{ "text": Board.printBoard(board) }]
+      }
+      let savedNote = {
+        "response_type": "in_channel",
+        "text": "<@" + currentPlayer + "> won the game!",
+        "attachments": [{ "text": Board.printBoard(board) }]
+      }
 
-      Game.update(req, res, board, note);
+      if (currentGame.notes !== null) {
+        res.send(currentGame.notes);
+        return;
+      }
+
+      Game.update(req, res, board, savedNote);
       res.send(winningMessage);
       return;
     }
 
+    // check if this move caused a tie
     if (Board.checkTie(board)) {
-      let tieMessage = currentGame.notes || "We have a tie! <@" + currentGame.owner_mark_x + "> as player X and <@" + currentGame.owner_mark_0 + "as player O. \n" + Board.printBoard(board);
-      let note = "It's a tie! <@" + currentGame.owner_mark_x + "> as player X and <@" + currentGame.owner_mark_0 + "as player O. \n" + Board.printBoard(board);
+      let tieMessage = {
+        "response_type": "in_channel",
+        "text": "It's a tie! <@" + currentGame.owner_mark_x + "> as player X and <@" + currentGame.owner_mark_0 + "> as player O.",
+        "attachments": [{ "text": Board.printBoard(board) }]
+      }
 
-      Game.update(req, res, board, note);
+      if (currentGame.notes === null) {
+        Game.update(req, res, board, tieMessage);
+      }
+
       res.send(tieMessage);
       return;
     }
 
-    if (req.body.user_id !== nextPlayerUp) {
-      res.send("Hew now, it's <@" + nextPlayerUp + ">'s turn!");
-      return;
-    }
-
+    // if the desired move is valid update the board
     if (Board.validateMove(number, JSON.parse(currentGame.board))) {
-      let note = "";
+      let note = null;
       Game.update(req, res, board, note);
       res.send(Board.printBoard(board)); // print the board with the new marking
     } else {
+      if (currentGame.notes !== null) {
+        res.send(currentGame.notes); // return game notes if it was a tie or win
+        return;
+      }
       res.send("Sorry that's not a valid move. Please try again!");
     }
   })
