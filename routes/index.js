@@ -41,7 +41,7 @@ router.post('/', (req,res) => {
   let command = commandArr[0];
 
   // verify the signing secret
-  // if (Signature.isVerified(req)) {
+  if (Signature.isVerified(req)) {
     switch (command) {
       case "help":
         res.send(helpJson);
@@ -72,10 +72,10 @@ router.post('/', (req,res) => {
         console.log(req.body)
         res.send("Hello! For a list of valid commands please type `/ttt help`.")
       }
-    // } else {
-    //   console.log('token not verified');
-    //   res.sendStatus(404);
-    // }
+    } else {
+      console.log('token not verified');
+      res.sendStatus(404);
+    }
 });
 
 

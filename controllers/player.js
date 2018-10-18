@@ -48,12 +48,10 @@ const playTurn = (req, res, number) => {
 
     // verify if the user who made the play is supposed to be next
     if (req.body.user_id !== validateCurrentPlayer) {
-      if (currentGame.notes !== null) {
-        res.send(currentGame.notes + " \n" + Board.printBoard(board));
-        return;
+      if (currentGame.notes === null) {
+        return res.send("Hew now, it's <@" + validateCurrentPlayer + ">'s turn!");
       } else {
-        res.send("Hew now, it's <@" + validateCurrentPlayer + ">'s turn!");
-        return;
+        return res.send(currentGame.notes + " \n" + Board.printBoard(board));
       }
     }
 
@@ -112,7 +110,7 @@ const playTurn = (req, res, number) => {
     }
 
     // if the desired move is valid update the board
-    if (Board.validateMove(number, JSON.parse(currentGame.board))) {
+    if (Board.validateMove(number, JSON.parse(currentGame.board)) && (currentGame.notes === null)) {
       let note = null;
       Game.update(req, res, board, note);
       let printBoard = {
