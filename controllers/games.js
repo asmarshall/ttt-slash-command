@@ -22,11 +22,9 @@ const Game = {
       owner_mark_x:p1Username,
       board:newBoard
     }, '*')
-     .then(function(all){
-       res.json({
-         error:false,
-         data: all
-       })
+     .then(function(newGame){
+       let gameDetails = newGame[0];
+       res.send('Hey @' + gameDetails.owner_mark_0 + '! @' + gameDetails.owner_mark_x + ' challenged you to a game of Tic Tac Toe. You are up first!')
      })
      .catch(function(err){
        res.status(500).json({
