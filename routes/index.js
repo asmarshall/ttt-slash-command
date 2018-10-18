@@ -33,7 +33,7 @@ router.get('/api/games/:channel_id', (req,res) => {
  * Possible commands include:
  * /ttt help - lists command options for playing ttt
  * /ttt challenge [@username] - creates a new Game and displays board
- * /ttt move [number] - updates the db with the player's desired move and displays board 
+ * /ttt move [number] - updates the db with the player's desired move and displays board
  */
 router.post('/', (req,res) => {
   let commandArr = req.body.text.split(" ");
@@ -66,7 +66,7 @@ router.post('/', (req,res) => {
         res.send("Hello! For a list of valid commands please type `/ttt help`.")
       }
     } else {
-      console.log('token not verified');
+      debug('token not verified');
       res.sendStatus(404);
     }
 });
