@@ -66,7 +66,7 @@ router.post('/', (req,res) => {
         res.send("Hello! For a list of valid commands please type `/ttt help`.")
       }
     } else {
-      debug('token not verified');
+      console.log('token not verified');
       res.sendStatus(404);
     }
 });
