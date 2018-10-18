@@ -13,8 +13,11 @@ const isVerified = (req) => {
   if (timestamp < fiveMinutesAgo) return false;
 
   hmac.update(`${version}:${timestamp}:${req.rawBody}`);
-  console.log(req)
-  console.log(hmac)
+  console.log(timestamp)
+  console.log('***************************************')
+  console.log(hash)
+  console.log('***************************************')
+  console.log(hmac.digest('hex'))
 
   // check that the request signature matches expected value
   return timingSafeCompare(hmac.digest('hex'), hash);
