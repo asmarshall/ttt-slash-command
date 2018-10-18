@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+const Game = require('./games.js');
 
 const helpJson = {
   "response_type": "in_channel",
@@ -12,6 +13,19 @@ const helpJson = {
       {"text":"`/ttt move [number]` Enter the number that you would like to make a play on."}
     ]
   }
+
+const newBoard = {
+  1: ' ',
+  2: ' ',
+  3: ' ',
+  4: ' ',
+  5: ' ',
+  6: ' ',
+  7: ' ',
+  8: ' ',
+  9: ' '
+}
+
 
 router.get('/', (req,res) => {
   res.render('index', {
@@ -27,6 +41,13 @@ router.post('/', (req,res) => {
   switch (command) {
     case "help":
       res.send(helpJson);
+      break;
+    case "challenge":
+      if (!commandArr[1]) {
+        res.send("You must include a proper username. The command for challenging is `/ttt challenge [@username]`. Please try again!")
+      } else {
+        Game.create(req, res, newBoard)
+      }
       break;
     default:
       console.log(req.body)
