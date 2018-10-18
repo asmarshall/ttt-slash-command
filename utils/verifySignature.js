@@ -13,6 +13,15 @@ const isVerified = (req) => {
   if (timestamp < fiveMinutesAgo) return false;
 
   hmac.update(`${version}:${timestamp}:${req.rawBody}`);
+
+  console.log(req.rawBody)
+  console.log('***************************************')
+  console.log(process.env.SLACK_SIGNING_SECRET)
+  console.log('***************************************')
+  console.log(version)
+  console.log('***************************************')
+  console.log(signature)
+  console.log('***************************************')
   console.log(timestamp)
   console.log('***************************************')
   console.log(hash)
