@@ -8,6 +8,7 @@ const isVerified = (req) => {
   const hmac = crypto.createHmac('sha256', process.env.SLACK_SIGNING_SECRET);
   const [version, hash] = signature.split('=');
 
+  console.log(hmac)
   // check if the timestamp is too old
   const fiveMinutesAgo = ~~(Date.now() / 1000) - (60 * 5);
   if (timestamp < fiveMinutesAgo) return false;
