@@ -24,7 +24,7 @@ const Game = {
     }, '*')
      .then(function(newGame){
        let gameDetails = newGame[0];
-       res.send('Hey @' + gameDetails.owner_mark_0 + '! @' + gameDetails.owner_mark_x + ' challenged you to a game of Tic Tac Toe. You are up first!')
+       res.send('Hey <@' + gameDetails.owner_mark_0 + '>! <@' + gameDetails.owner_mark_x + '> challenged you to a game of Tic Tac Toe. You are up first!')
      })
      .catch(function(err){
        res.status(500).json({
