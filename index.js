@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 var express = require('express');
 var bodyParser = require('body-parser');
 var morgan = require('morgan');
@@ -9,11 +11,17 @@ var app = express();
 // middleware
 app.use(express.static('assests'));
 app.set('view engine', 'ejs');
-app.use(bodyParser.urlencoded({
-	extended: true}
-	));
 app.use(morgan('tiny'));
 app.use(methodOverride('_method'));
+
+const rawBodyBuffer = (req, res, buf, encoding) => {
+  if (buf && buf.length) {
+    req.rawBody = buf.toString(encoding || 'utf8');
+  }
+};
+
+app.use(bodyParser.urlencoded({verify: rawBodyBuffer, extended: true }));
+app.use(bodyParser.json({ verify: rawBodyBuffer }));
 
 app.use('/', router);
 
