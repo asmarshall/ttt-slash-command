@@ -1,4 +1,4 @@
-// Update with your config settings.
+require('dotenv').config({ silent: process.env.NODE_ENV === 'production' });
 
 module.exports = {
 
