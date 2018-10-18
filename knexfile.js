@@ -3,7 +3,7 @@ require('dotenv').config({ silent: process.env.NODE_ENV === 'production' });
 module.exports = {
 
   development: {
-      client: 'postgresql',
+      client: 'pg',
       connection: {
           database: 'ttt-db'
       },
@@ -11,7 +11,7 @@ module.exports = {
   },
 
   staging: {
-    client: 'postgresql',
+    client: 'pg',
     connection: {
       database: 'my_db',
       user:     'username',
@@ -27,17 +27,14 @@ module.exports = {
   },
 
   production: {
-    client: 'postgresql',
-    connection: {
-      database: process.env.DATABASE_URL,
+    client: 'pg',
+    connection: process.env.DATABASE_URL + `?ssl=true`,
+    migrations: {
+      directory: './db/migrations'
     },
     pool: {
       min: 2,
       max: 10
-    },
-    migrations: {
-      tableName: 'knex_migrations'
     }
   }
-
 };
