@@ -68,7 +68,9 @@ const playTurn = (req, res, number) => {
       marking = 'X';
     }
 
-    board[number] = marking; // mark the board
+    if (currentGame.notes === null) {
+      board[number] = marking; // mark the board
+    }
 
     // check if this move is a winning play
     if (Board.checkWin(marking, board)) {

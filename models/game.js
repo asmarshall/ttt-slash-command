@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-var knex = require('../db/knex.js');
+let knex = require('../db/knex.js');
 
 const Game = {
   /**
@@ -11,10 +11,19 @@ const Game = {
    * @returns {object} game object
    */
    async create(req, res, newBoard) {
-    var command = req.body.text.split(" ");
-    var usernameRegex = /(?<=\<@)([A-Z])\w+/g;
-    var p2Username = command[1].match(usernameRegex)[0];
-    var p1Username = req.body.user_id.toString();
+    let command = req.body.text.split(" ");
+    let usernameRegex = /(?<=\<@)([A-Z])\w+/g;
+
+    if (command[1].match(usernameRegex) === null) {
+      return res.send("Looks like that's not a valid username in this channel. Please try again!")
+    }
+
+    let p1Username = req.body.user_id.toString();
+    let p2Username = command[1].match(usernameRegex)[0];
+
+    if (p1Username === p2Username) {
+      return res.send("Sorry. You may not challenge yourself to a game. Please choose another team member in this channel!")
+    }
 
     await knex('games').insert({
       channel_id:req.body.channel_id,
