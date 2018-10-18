@@ -7,7 +7,7 @@ const isVerified = (req) => {
   const timestamp = req.headers['x-slack-request-timestamp'];
   const hmac = crypto.createHmac('sha256', process.env.SLACK_SIGNING_SECRET);
   const [version, hash] = signature.split('=');
-  const reqBody = req.body();
+  const reqBody = req.body;
 
   console.log(hmac)
   // check if the timestamp is too old
