@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Game = require('../models/game.js');
 const Player = require('../controllers/player.js');
+const Signature = require('../utils/verifySignature.js');
 
 const helpJson = {
   "response_type": "in_channel",
@@ -26,32 +27,47 @@ router.get('/api/games/:channel_id', (req,res) => {
   Game.getLatest(req,res)
 });
 
+/*
+ * Endpoint to receive Slack user commands. Verifies the signing signature
+ * and performs the player's desired action.
+ * Possible commands include:
+ * /ttt help - lists command options for playing ttt
+ * /ttt challenge [@username] - creates a new Game and displays board
+ * /ttt move [number] - updates the db with the player's desired move and displays board 
+ */
 router.post('/', (req,res) => {
-  var commandArr = req.body.text.split(" ");
-  var command = commandArr[0];
+  let commandArr = req.body.text.split(" ");
+  let command = commandArr[0];
 
-  switch (command) {
-    case "help":
-      res.send(helpJson);
-      break;
-    case "challenge":
-      if (!commandArr[1]) {
-        res.send("You must include a proper username. The command for challenging is `/ttt challenge [@username]`. Please try again!")
-      } else {
-        Player.challengeUser(req, res);
-      }
-      break;
-    case "move":
+  // verify the signing secret
+  if (Signature.isVerified(req)) {
+    switch (command) {
+      case "help":
+        res.send(helpJson);
+        break;
+      case "challenge":
         if (!commandArr[1]) {
-          res.send("That was an invalid move. The command for making a move is `/ttt move [number]`. Please try again!")
+          res.send("You must include a proper username. The command for challenging is `/ttt challenge [@username]`. Please try again!")
         } else {
-          var number = commandArr[1];
-
-          Player.playTurn(req, res, number);
+          Player.challengeUser(req, res);
         }
         break;
-    default:
-      console.log(req.body)
+      case "move":
+          if (!commandArr[1]) {
+            res.send("That was an invalid move. The command for making a move is `/ttt move [number]`. Please try again!")
+          } else {
+            let number = commandArr[1];
+
+            Player.playTurn(req, res, number);
+          }
+          break;
+      default:
+        console.log(req.body)
+        res.send("Hello! For a list of valid commands please type `/ttt help`.")
+      }
+    } else {
+      console.log('token not verified');
+      res.sendStatus(404);
     }
 });
 

@@ -67,7 +67,7 @@ const playTurn = (req, res, number) => {
       }
 
       if (currentGame.notes !== null) {
-        res.send(currentGame.notes);
+        res.send(JSON.parse(currentGame.notes));
         return;
       }
 
@@ -96,10 +96,14 @@ const playTurn = (req, res, number) => {
     if (Board.validateMove(number, JSON.parse(currentGame.board))) {
       let note = null;
       Game.update(req, res, board, note);
-      res.send(Board.printBoard(board)); // print the board with the new marking
+      let printBoard = {
+        "response_type": "in_channel",
+        "text": Board.printBoard(board),
+      }
+      res.send(printBoard); // print the board with the new marking
     } else {
       if (currentGame.notes !== null) {
-        res.send(currentGame.notes); // return game notes if it was a tie or win
+        res.send(JSON.parse(currentGame.notes)); // return game notes if it was a tie or win
         return;
       }
       res.send("Sorry that's not a valid move. Please try again!");
