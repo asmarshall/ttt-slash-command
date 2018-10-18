@@ -2,7 +2,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var morgan = require('morgan');
 var methodOverride = require('method-override');
-var router = require('./controllers/router');
+var router = require('./routes/index');
 
 var app = express();
 
