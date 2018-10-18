@@ -3,10 +3,20 @@ const Board = require('./board.js');
 
 const challengeUser = (req, res) => {
   let newBoard = Board.newBoard;
-  Game.create(req, res, newBoard)
+  Board.getCurrentGame(req, res).then(function(currentGame) {
+    if (!currentGame) {
+      Game.create(req, res, newBoard);
+    } else {
+      let responseJson = {
+        "response_type": "in_channel",
+        "text": "Sorry, there may only be one game per channel. <@" + currentGame.owner_mark_x + "> and <@" + currentGame.owner_mark_0 + "> are currently playing!"
+      }
+      res.send(responseJson);
+    }
+  })
 };
 
-const findNextPlayer = (board, owner_mark_o, owner_mark_x) => {
+const findNext = (board, owner_mark_o, owner_mark_x) => {
   let xCount = 0;
   let oCount = 0;
   Object.keys(board).forEach(position => {
@@ -31,23 +41,30 @@ const validatePlayer = (user_id, owner_mark_o, owner_mark_x) => {
 }
 
 const playTurn = (req, res, number) => {
-  var currentPlayer, marking, board, nextPlayerUp;
+  var currentPlayer, marking, board, validateCurrentPlayer, nextPlayerUp;
   Board.getCurrentGame(req, res).then(function(currentGame) {
     board = JSON.parse(currentGame.board);
-    nextPlayerUp = findNextPlayer(board, currentGame.owner_mark_0, currentGame.owner_mark_x);
+    validateCurrentPlayer = findNext(board, currentGame.owner_mark_0, currentGame.owner_mark_x);
 
     // verify if the user who made the play is supposed to be next
-    if (req.body.user_id !== nextPlayerUp) {
-      res.send("Hew now, it's <@" + nextPlayerUp + ">'s turn!");
-      return;
+    if (req.body.user_id !== validateCurrentPlayer) {
+      if (currentGame.notes !== null) {
+        res.send(currentGame.notes + " \n" + Board.printBoard(board));
+        return;
+      } else {
+        res.send("Hew now, it's <@" + validateCurrentPlayer + ">'s turn!");
+        return;
+      }
     }
 
     // assign the markings: the challenger is X and other player is O
     if (req.body.user_id === currentGame.owner_mark_0) {
       currentPlayer = currentGame.owner_mark_0;
+      nextPlayerUp = currentGame.owner_mark_x;
       marking = 'O';
     } else {
       currentPlayer = currentGame.owner_mark_x;
+      nextPlayerUp = currentGame.owner_mark_0;
       marking = 'X';
     }
 
@@ -60,20 +77,19 @@ const playTurn = (req, res, number) => {
         "text": "We have a winner!! Congrats <@" + currentPlayer + ">!",
         "attachments": [{ "text": Board.printBoard(board) }]
       }
-      let savedNote = {
-        "response_type": "in_channel",
-        "text": "<@" + currentPlayer + "> won the game!",
-        "attachments": [{ "text": Board.printBoard(board) }]
-      }
+      let savedNote =  "<@" + currentPlayer + "> won the game!";
 
-      if (currentGame.notes !== null) {
-        res.send(JSON.parse(currentGame.notes));
-        return;
+      if (currentGame.notes === null) {
+        Game.update(req, res, board, savedNote);
+        return res.send(winningMessage);
+      } else {
+        let gameNotes = {
+          "response_type": "in_channel",
+          "text": currentGame.notes,
+          "attachments": [{ "text": Board.printBoard(board) }]
+        }
+        return res.send(gameNotes);
       }
-
-      Game.update(req, res, board, savedNote);
-      res.send(winningMessage);
-      return;
     }
 
     // check if this move caused a tie
@@ -83,9 +99,10 @@ const playTurn = (req, res, number) => {
         "text": "It's a tie! <@" + currentGame.owner_mark_x + "> as player X and <@" + currentGame.owner_mark_0 + "> as player O.",
         "attachments": [{ "text": Board.printBoard(board) }]
       }
+      let savedNote = "It's a tie! <@" + currentGame.owner_mark_x + "> as player X and <@" + currentGame.owner_mark_0 + "> as player O.";
 
       if (currentGame.notes === null) {
-        Game.update(req, res, board, tieMessage);
+        Game.update(req, res, board, savedNote);
       }
 
       res.send(tieMessage);
@@ -98,12 +115,12 @@ const playTurn = (req, res, number) => {
       Game.update(req, res, board, note);
       let printBoard = {
         "response_type": "in_channel",
-        "text": Board.printBoard(board),
+        "text": "<@" + nextPlayerUp + ">: you are up next! \n" + Board.printBoard(board),
       }
       res.send(printBoard); // print the board with the new marking
     } else {
       if (currentGame.notes !== null) {
-        res.send(JSON.parse(currentGame.notes)); // return game notes if it was a tie or win
+        res.send(currentGame.notes + " \n" + Board.printBoard(board)); // return game notes if it was a tie or win
         return;
       }
       res.send("Sorry that's not a valid move. Please try again!");
@@ -111,7 +128,12 @@ const playTurn = (req, res, number) => {
   })
   .catch(function (error) {
     console.log(error);
+    res.sendStatus(404);
   });
 };
 
-module.exports = { challengeUser, playTurn };
+module.exports = {
+  findNext,
+  challengeUser,
+  playTurn
+};

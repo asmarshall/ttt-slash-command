@@ -41,13 +41,9 @@ const Game = {
        res.send(responseJson);
      })
      .catch(function(err){
-       res.status(500).json({
-       error:true,
-       data:{
-         message:err.message
-       }
-      })
-    })
+       console.log(err.message)
+       res.sendStatus(500);
+     })
   },
 
   /**
@@ -66,12 +62,39 @@ const Game = {
         console.log(updatedGame)
       })
       .catch(function(err){
-        res.status(500).json({
-          error:true,
-          data:{
-            message:err.message
+        console.log(err.message)
+        res.sendStatus(500);
+      })
+  },
+
+  /**
+   * Delete A Game
+   * @param {object} req
+   * @param {object} res
+   * @returns {object} deleted game
+   */
+  async delete(req, res) {
+    await knex('games')
+      .where({ channel_id:req.body.channel_id })
+      .del()
+      .then(function(existingGame){
+        if (existingGame) {
+          let responseJson = {
+            "response_type": "in_channel",
+            "text": "Ending the game! To start another, challenge a team member in this channel with `/ttt challenge [@username]`."
           }
-        })
+          res.send(responseJson);
+        } else {
+          let responseJson = {
+            "response_type": "in_channel",
+            "text": "There is no existing game in this channel! To start one, challenge a team member in this channel with `/ttt challenge [@username]`."
+          }
+          res.send(responseJson);
+        }
+      })
+      .catch(function(err){
+        console.log(err.message)
+        res.sendStatus(500);
       })
   },
 
@@ -90,13 +113,8 @@ const Game = {
         return res.status(200).send(latestGame[0]);
       })
       .catch(function(err){
-        console.log(err)
-        res.status(500).json({
-          error:true,
-          data:{
-            message:err.message
-          }
-        })
+        console.log(err.message)
+        res.sendStatus(500);
       })
   },
 

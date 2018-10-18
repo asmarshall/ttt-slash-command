@@ -1,4 +1,5 @@
 const axios = require('axios');
+const Game = require('../models/game.js');
 
 const newBoard = {
   1: ' ',
@@ -12,6 +13,10 @@ const newBoard = {
   9: ' '
 };
 
+const deleteGame = (req, res) => {
+  Game.delete(req, res);
+};
+
 const getCurrentGame = (req, res) => {
   let urlApi;
   let env = process.env.NODE_ENV || 'development';
@@ -23,7 +28,6 @@ const getCurrentGame = (req, res) => {
   }
 
   return new Promise((resolve, reject) => {
-    console.log(urlApi)
     axios({
       method:'get',
       url: urlApi + '/api/games/' + req.body.channel_id ,
@@ -36,6 +40,44 @@ const getCurrentGame = (req, res) => {
       console.log(error);
       reject(error);
     });
+  });
+}
+
+const getGameStatus = (req, res) => {
+  let board, nextPlayerUp, responseJson;
+
+  getCurrentGame(req, res).then(function(currentGame) {
+    const Player = require('./player.js');
+    // let the user know there is not a current game in the channel
+    if (!currentGame) {
+      let responseJson = {
+        "response_type": "in_channel",
+        "text": "There is no current game in this channel."
+      }
+      res.send(responseJson);
+      return;
+    }
+
+    board = JSON.parse(currentGame.board);
+    nextPlayerUp = Player.findNext(board, currentGame.owner_mark_0, currentGame.owner_mark_x);
+
+    if (currentGame.notes === null) {
+      responseJson = {
+        "response_type": "in_channel",
+        "text": "This current game is between <@" + currentGame.owner_mark_x + "> and <@" + currentGame.owner_mark_0 + "> . " +
+        "It looks like <@" + nextPlayerUp + "> is up next. \n" + printBoard(board)
+      }
+    } else {
+      responseJson = {
+        "response_type": "in_channel",
+        "text": currentGame.notes + "\n" + printBoard(board)
+      }
+    }
+    res.send(responseJson);
+  })
+  .catch(function (error) {
+    console.log(error);
+    res.sendStatus(404);
   });
 }
 
@@ -70,7 +112,7 @@ const winningCombs = [
 ];
 
 const checkWin = (mark, board) => {
-  var i, j, markCount;
+  let i, j, markCount;
 
     for (i = 0; i < winningCombs.length; i++) {
       markCount = 0;
@@ -89,7 +131,7 @@ const checkWin = (mark, board) => {
 }
 
 const checkTie = (board) => {
-  for (var i = 1; i <= Object.keys(board).length; i++) {
+  for (let i = 1; i <= Object.keys(board).length; i++) {
     if (board[i] === ' ') {
       return false;
     }
@@ -103,5 +145,7 @@ module.exports = {
   checkWin,
   checkTie,
   validateMove,
-  printBoard
+  printBoard,
+  deleteGame,
+  getGameStatus
 };

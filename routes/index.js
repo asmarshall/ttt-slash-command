@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Game = require('../models/game.js');
 const Player = require('../controllers/player.js');
+const Board = require('../controllers/board.js');
 const Signature = require('../utils/verifySignature.js');
 
 const helpJson = {
@@ -53,14 +54,20 @@ router.post('/', (req,res) => {
         }
         break;
       case "move":
-          if (!commandArr[1]) {
-            res.send("That was an invalid move. The command for making a move is `/ttt move [number]`. Please try again!")
-          } else {
-            let number = commandArr[1];
+        if (!commandArr[1]) {
+          res.send("That was an invalid move. The command for making a move is `/ttt move [number]`. Please try again!")
+        } else {
+          let number = commandArr[1];
 
-            Player.playTurn(req, res, number);
-          }
-          break;
+          Player.playTurn(req, res, number);
+        }
+        break;
+      case "end":
+        Board.deleteGame(req, res);
+        break;
+      case "status":
+        Board.getGameStatus(req, res);
+        break;
       default:
         console.log(req.body)
         res.send("Hello! For a list of valid commands please type `/ttt help`.")
