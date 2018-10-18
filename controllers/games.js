@@ -25,15 +25,23 @@ const Game = {
      .then(function(newGame){
        let gameDetails = newGame[0];
        let board = JSON.parse(gameDetails.board);
+       let responseJson = {
+         "response_type": "in_channel",
+         "text": "Hey <@" + gameDetails.owner_mark_0 + ">! <@" + gameDetails.owner_mark_x + "> challenged you to a game of Tic Tac Toe. You are up first!",
+         "attachments":
+           [
+             {"text":
+             "\n```\n" +
+                   " " + board[1] + " | " + board[2] + " | " + board[3] + "\n" +
+                   " --+---+--\n" +
+                   " " + board[4] + " | " + board[5] + " | " + board[6] + "\n" +
+                   " --+---+--\n" +
+                   " " + board[7] + " | " + board[8] + " | " + board[9] + "\n```"
+             },
+           ]
+         }
 
-       res.send('Hey <@' + gameDetails.owner_mark_0 + '>! <@' + gameDetails.owner_mark_x + '> challenged you to a game of Tic Tac Toe. You are up first!' +
-       '\n```\n' +
-             ' ' + board[1] + ' | ' + board[2] + ' | ' + board[3] + '\n' +
-             ' --+---+--\n' +
-             ' ' + board[4] + ' | ' + board[5] + ' | ' + board[6] + '\n' +
-             ' --+---+--\n' +
-             ' ' + board[7] + ' | ' + board[8] + ' | ' + board[9] + '\n```'
-        );
+       res.send(responseJson);
      })
      .catch(function(err){
        res.status(500).json({
