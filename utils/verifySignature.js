@@ -3,8 +3,8 @@ const crypto = require('crypto');
 const timingSafeCompare = require('tsscmp');
 
 const isVerified = (req) => {
-  const signature = req.headers['X-Slack-Signature'];
-  const timestamp = req.headers['X-Slack-Request-Timestamp'];
+  const signature = req.headers['x-slack-signature'];
+  const timestamp = req.headers['x-slack-request-timestamp'];
   const hmac = crypto.createHmac('sha256', process.env.SLACK_SIGNING_SECRET);
   const [version, hash] = signature.split('=');
   const reqBody = req.body();
