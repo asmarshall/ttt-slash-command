@@ -2,17 +2,12 @@ require('dotenv').config();
 
 var express = require('express');
 var bodyParser = require('body-parser');
-var morgan = require('morgan');
-var methodOverride = require('method-override');
 var router = require('./routes/index');
 
 var app = express();
 
 // middleware
-app.use(express.static('assests'));
 app.set('view engine', 'ejs');
-app.use(morgan('tiny'));
-app.use(methodOverride('_method'));
 
 const rawBodyBuffer = (req, res, buf, encoding) => {
   if (buf && buf.length) {

@@ -27,45 +27,6 @@ router.get('/', (req, res) => {
 });
 
 /*
- * This part is needed for distributing the app.
- */
-router.get('/auth', (req, res) => {
-  if (!req.query.code) { // access denied
-    res.redirect('/?error=access_denied');
-    return;
-  }
-  const authInfo = {
-    client_id: process.env.SLACK_CLIENT_ID,
-    client_secret: process.env.SLACK_CLIENT_SECRET,
-    code: req.query.code
-  };
-
-  axios.post(`${apiUrl}/oauth.access`, qs.stringify(authInfo))
-    .then((result) => {
-      console.log(result.data);
-
-      const { access_token, refresh_token, expires_in, error } = result.data;
-
-      if(error) {
-        res.sendStatus(401);
-        console.log(error);
-        return;
-      }
-
-      axios.post(`${apiUrl}/team.info`, qs.stringify({token: access_token})).then((result) => {
-        if(!result.data.error) {
-          res.redirect(`http://${result.data.team.domain}.slack.com`);
-        }
-      }).catch((err) => { console.error(err); });
-
-    }).catch((err) => {
-      console.error(err);
-    });
-
-});
-
-
-/*
  * Endpoint to retrieve the status of the latest game.
  */
 router.get('/api/games/:channel_id', (req,res) => {
