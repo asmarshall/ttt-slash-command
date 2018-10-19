@@ -1,29 +1,73 @@
 const express = require('express');
+const axios = require('axios');
 const router = express.Router();
 const Game = require('../models/game.js');
 const Player = require('../controllers/player.js');
 const Board = require('../controllers/board.js');
 const Signature = require('../utils/verifySignature.js');
+const apiUrl = 'https://slack.com/api';
 
 const helpJson = {
   "response_type": "in_channel",
-  "text": "The following options are available for TTT:",
+  "text": "TTT is for two players, X and O, who take turns marking the spaces in a 3×3 grid. The following options are available:",
   "attachments":
     [
-      {"text":"`/ttt challenge @their-username` Challenge another user in your channel to a game of TTT."},
+      {"text":"`/ttt challenge [@username]` Challenge another user in your channel to a game of TTT."},
       {"text":"`/ttt status` Prints the board from an existing game, and displays who goes next."},
       {"text":"`/ttt end` Ends the current game in the specific channel."},
-      {"text":"`/ttt move [number]` Enter the number that you would like to make a play on."}
+      {"text":"`/ttt move [number]` Enter the number (1-9) that you would like to make a play on."}
     ]
   }
 
-router.get('/', (req,res) => {
+router.get('/', (req, res) => {
   res.render('index', {
     message:
     'Tic-Tac-Toe Slack Slash Command'
   });
 });
 
+/*
+ * This part is needed for distributing the app.
+ */
+router.get('/auth', (req, res) => {
+  if (!req.query.code) { // access denied
+    res.redirect('/?error=access_denied');
+    return;
+  }
+  const authInfo = {
+    client_id: process.env.SLACK_CLIENT_ID,
+    client_secret: process.env.SLACK_CLIENT_SECRET,
+    code: req.query.code
+  };
+
+  axios.post(`${apiUrl}/oauth.access`, qs.stringify(authInfo))
+    .then((result) => {
+      console.log(result.data);
+
+      const { access_token, refresh_token, expires_in, error } = result.data;
+
+      if(error) {
+        res.sendStatus(401);
+        console.log(error);
+        return;
+      }
+
+      axios.post(`${apiUrl}/team.info`, qs.stringify({token: access_token})).then((result) => {
+        if(!result.data.error) {
+          res.redirect(`http://${result.data.team.domain}.slack.com`);
+        }
+      }).catch((err) => { console.error(err); });
+
+    }).catch((err) => {
+      console.error(err);
+    });
+
+});
+
+
+/*
+ * Endpoint to retrieve the status of the latest game.
+ */
 router.get('/api/games/:channel_id', (req,res) => {
   Game.getLatest(req,res)
 });
@@ -70,7 +114,7 @@ router.post('/', (req,res) => {
         break;
       default:
         console.log(req.body)
-        res.send("Hello! For a list of valid commands please type `/ttt help`.")
+        res.send("For a list of valid commands please type `/ttt help`.")
       }
     } else {
       console.log('token not verified');
