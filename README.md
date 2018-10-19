@@ -1,6 +1,6 @@
 # Tic-Tac-Toe: Slack Slash Command
 
-This is a slash command to play game of tic-tac-toe with fellow team members in a Slack channel. Not familiar with the rules of the game? Check them out [here](https://en.wikipedia.org/wiki/Tic-tac-toe).
+This is a slash command to play the game of tic-tac-toe with fellow team members in a Slack channel. Not familiar with the rules of the game? Check them out [here](https://en.wikipedia.org/wiki/Tic-tac-toe).
 
 To play the game on Slack, follow these commands:
  - `/ttt challenge [@username]`  - challenges another user in your channel to a game of TTT
@@ -12,8 +12,8 @@ To play the game on Slack, follow these commands:
 ---
 ### Technologies Used:
 
-NodeJS
-Express JS
-Knex - a SQL schema and query builder with a javascript sytnax (used with PSQL database)
+ - NodeJS
+ - Express JS
+ - Knex - a SQL schema and query builder with a javascript sytnax (used with PSQL database)
 
 Heroku is used for deployment at: http://ttt-slackapp.herokuapp.com
