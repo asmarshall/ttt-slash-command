@@ -74,8 +74,7 @@ const playTurn = (req, res, number) => {
     if (Board.checkWin(marking, board)) {
       let winningMessage = {
         "response_type": "in_channel",
-        "text": "We have a winner!! Congrats <@" + currentPlayer + ">!",
-        "attachments": [{ "text": Board.printBoard(board) }]
+        "text": "We have a winner!! Congrats <@" + currentPlayer + ">! \n" + Board.printBoard(board)
       }
       let savedNote =  "<@" + currentPlayer + "> won the game!";
 
@@ -85,8 +84,7 @@ const playTurn = (req, res, number) => {
       } else {
         let gameNotes = {
           "response_type": "in_channel",
-          "text": currentGame.notes,
-          "attachments": [{ "text": Board.printBoard(board) }]
+          "text": currentGame.notes + " \n" + Board.printBoard(board)
         }
         return res.send(gameNotes);
       }
@@ -96,8 +94,7 @@ const playTurn = (req, res, number) => {
     if (Board.checkTie(board) && (currentGame.notes === null)) {
       let tieMessage = {
         "response_type": "in_channel",
-        "text": "It's a tie! <@" + currentGame.owner_mark_x + "> as player X and <@" + currentGame.owner_mark_0 + "> as player O.",
-        "attachments": [{ "text": Board.printBoard(board) }]
+        "text": "It's a tie! <@" + currentGame.owner_mark_x + "> as player X and <@" + currentGame.owner_mark_0 + "> as player O. \n" + Board.printBoard(board)
       }
       let savedNote = "It's a tie! <@" + currentGame.owner_mark_x + "> as player X and <@" + currentGame.owner_mark_0 + "> as player O.";
 
@@ -112,10 +109,19 @@ const playTurn = (req, res, number) => {
     // if the desired move is valid update the board
     if (Board.validateMove(number, JSON.parse(currentGame.board)) && (currentGame.notes === null)) {
       let note = null;
+      let nextMarking;
+
       Game.update(req, res, board, note);
+
+      if (marking === "X") {
+        nextMarking = "O";
+      } else {
+        nextMarking = "X";
+      }
+
       let printBoard = {
         "response_type": "in_channel",
-        "text": "<@" + nextPlayerUp + ">: you are up next! \n" + Board.printBoard(board),
+        "text": "<@" + nextPlayerUp + ">: you are up next as player " + nextMarking + "! \n" + Board.printBoard(board),
       }
       res.send(printBoard); // print the board with the new marking
     } else {
@@ -128,7 +134,7 @@ const playTurn = (req, res, number) => {
   })
   .catch(function (error) {
     console.log(error);
-    res.sendStatus(404);
+    res.send("Something went wrong... please ensure that there is a game in this channel by typing `/ttt status`.");
   });
 };
 
