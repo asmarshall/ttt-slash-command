@@ -93,7 +93,7 @@ const playTurn = (req, res, number) => {
     }
 
     // check if this move caused a tie
-    if (Board.checkTie(board)) {
+    if (Board.checkTie(board) && (currentGame.notes === null)) {
       let tieMessage = {
         "response_type": "in_channel",
         "text": "It's a tie! <@" + currentGame.owner_mark_x + "> as player X and <@" + currentGame.owner_mark_0 + "> as player O.",
